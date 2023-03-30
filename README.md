@@ -2,72 +2,63 @@
 
 An API proxy designed for AWS serverless architecture, works with Lambda and API Gateway.
 
-# User Manual
+# Tutorial
 
 ## Requirements:
 
 -   An Amazon Web Service account
 -   A web browser
+-   Latest Go runtime environment (optional, for build on local)
 
-## Steps:
+## Deployment steps:
 
-1.  Download the release file or compile the source code to a binary file with the following environment variables set:
+### Setup Lambda function on AWS
 
-	```
-	$env:GOOS = "linux" 
-	$env:GOARCH = "amd64" 
-	$env:CGO_ENABLED = "0"`
-	```
-
-	Then compress the binary file into a .zip file.
-
-2.  Log in to the AWS Console.
-    
-3.  Select a region from the top right corner. Choose a region that balances latency and cost.
-    
-4.  In the search bar located in the upper left corner, enter "Lambda" and navigate to the Lambda service page.
-    
-5.  On the left-side panel, select "Functions", then click the "Create function" button on the following page.
-    
-6.  Select "Author from scratch".
-    
-7.  Enter a function name, such as "api-proxy", select "Go 1.x" runtime, and choose "x86_64" architecture.
-    
-8.  Leave the other settings as default and click "Create function".
-    
-9.  On the "api-proxy" function page, scroll down to the "Code" tab. Click "Upload from" - ".zip file" on the right, upload the compressed file, and wait for it to become ready.
-    
-10.  Click "Add trigger". On next page, select "API Gateway" and "Create a new API". Choose "HTTP API" for API type and "Open" for security. Click "Add" to finish this page.
-    
-11.  On the "Configuration" tab, select "Environment variables" on the left side panel. Add the following two environment variables:
+1. Log in to the AWS Console.
+2. Select a region from the top right corner. Choose a region that balances latency and cost.
+3. In the search bar located in the upper left corner, enter "Lambda" and navigate to the Lambda service page.
+4. On the left-side panel, select "Functions", then click the "Create function" button on the following page.
+5. Select "Author from scratch". Enter a function name, such as "api-proxy" in this tutorial, select "Go 1.x" runtime, and choose "x86_64" architecture. Leave the other settings as default and click "Create function".
+6. On the "api-proxy" function page, scroll down to the "Code" tab. Click "Upload from" - ".zip file" on the right, upload the compressed binary file, and wait for it to become ready.
+7. Scroll down to "Runtime settings", click "Edit", input "api-proxy-lambda" in the "Handler" textbox, click "Save".
+8. Click "Add trigger" on the "Function overview" diagram. On next page, select "API Gateway" and "Create a new API" as source. Choose "HTTP API" for API type and "Open" for security. Click "Add" to finish this page.
+9. On "Configuration" tab, select "Environment variables" on the left side panel. Add the following two environment variables:
 
 |Key | Value|
 |------------ | ------------|
 |DEST_DOMAIN|https://api.somewhere.com/|
 |LOG_MODE|true|
 
-Click "Save" to finish this page.
+The "DEST_DOMAIN" is a domain where you want your traffic be redirct to, it's necessary for this application.
+The "LOG_MODE" is optional, if it's set to "true", you will get more logs printout on Cloudwatch.
 
-12.  Using the search bar again, navigate to the API Gateway page. You'll see the API created by Lambda, which may have a default name "api-proxy-API". Click to enter its detail page.
-    
-13.  In the "Detail" page, click "Routes" on the left side. You can see a default route leading all incoming traffic from the exact path "/api-proxy".
-    
-14.  Since we're making a domain redirection, we'll use a greedy path variable. Click "Create" and enter "/api-proxy/{proxy+}" in the textbox. Leave the drop-down list on "ANY" and click "Create".
-    
-15.  Click "Integrations" on the left. You will see a tree view like this: 
 
-├── /api-proxy
-│    ANY        AWS Lambda
-│   └── /{proxy+}
-        ANY
 
-As you can see, there's nothing attached to the "/{proxy+}" path, which means this path won't do anything for now. 
-Click on the "ANY" below the "/{proxy+}" path. Select "api-proxy" from the drop-down list on the right panel, then click "Attach integration" to finish.
-    
-16. Your API Gateway and Lambda function should work now. Send an HTTP request to the API Gateway's Invoke URL with the function path, which might be like:
-https://random-characters.execute-api.your-region.amazonaws.com/default/api-proxy/and-whatever-you-want-to-add
+### Setup API Gateway on AWS
+
+1. Use the search to navigate to the API Gateway service page. You'll see an API was created by Lambda already, which may have a default name "api-proxy-API". Click to enter its detail page.
+2. In the "Detail" page, you'll see a default stage was created, with an Invoke URL be like https://random-characters.execute-api.your-region.amazonaws.com/default following.
+3. click "Routes" on the left side. You can see a default route leading all incoming traffic from the exact path "/api-proxy", it means all traffic to https://random-characters.execute-api.your-region.amazonaws.com/default/api-proxy will now perform to be a valid route, and only this specific path will work. However, it does not meet our requirements, we will improve it by adding a greedy path variable.
+4. Click on the "ANY" option located under "/api-proxy", enter "/api-proxy/{proxy+}" in the textbox, and select "ANY" from the drop-down list. Then, click "Save".
+5. Click on "Integrations" and ensure that a green "AWS Lambda" tag is displayed next to the "ANY" option. If it is not displayed, click on "ANY", select your Lambda function (api-proxy) from the drop-down list on the right panel, and click on the "Attach integration" button.
+
+Now that you have completed the implementation of this api-proxy on AWS, it should be functional.
+Send an HTTP request to the API Gateway's Invoke URL with the function path, which might be like:
+https://random-characters.execute-api.your-region.amazonaws.com/default/api-proxy/and/whatever/you-want-to-add
 
 And this application will redirect your request to:
-https://api.somewhere.com/and-whatever-you-want-to-add
-    
-17.  The logs can be found in CloudWatch services under "Logs" - "Log groups" with a default name "/aws/lambda/api-proxy", after your first log generated by calling the API or test in Lambda function page.
+https://api.somewhere.com/and/whatever/you-want-to-add
+
+
+### Build the source code and compress binary file
+
+Since the Lambda function supports two different architectures and is based on a Linux environment, the Go build settings should reflect this.
+
+For this tutorial, I use:
+```
+$env:GOOS = "linux" 
+$env:GOARCH = "amd64" 
+$env:CGO_ENABLED = "0"`
+```
+
+The compressed file should only contain the binary file and should be in zip format before uploading to Lambda.
