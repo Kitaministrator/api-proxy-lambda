@@ -39,8 +39,8 @@ The "LOG_MODE" is optional, if it's set to "true", you will get more logs printo
 1. Use the search to navigate to the API Gateway service page. You'll see an API was created by Lambda already, which may have a default name "api-proxy-API". Click to enter its detail page.
 2. In the "Detail" page, you'll see a default stage was created, with an Invoke URL be like https://random-characters.execute-api.your-region.amazonaws.com/default following.
 3. click "Routes" on the left side. You can see a default route leading all incoming traffic from the exact path "/api-proxy", it means all traffic to https://random-characters.execute-api.your-region.amazonaws.com/default/api-proxy will now perform to be a valid route, and only this specific path will work. However, it does not meet our requirements, we will improve it by adding a greedy path variable.
-4. Click on the "ANY" option located under "/api-proxy", enter "/api-proxy/{proxy+}" in the textbox, and select "ANY" from the drop-down list. Then, click "Save".
-5. Click on "Integrations" and ensure that a green "AWS Lambda" tag is displayed next to the "ANY" option. If it is not displayed, click on "ANY", select your Lambda function (api-proxy) from the drop-down list on the right panel, and click on the "Attach integration" button.
+4. Click on the "Create" button, enter "/api-proxy/{proxy+}" in the textbox, and select "ANY" from the drop-down list. Then, click "Save".
+5. Click on "Integrations", you may see a green "AWS Lambda" tag is displayed next to the "ANY" string under "/openai-api-proxy", but nothing for the second "ANY" string which under "/{proxy+}".Click on the second "ANY", select your Lambda function (api-proxy) from the drop-down list on the right panel, and click on the "Attach integration" button.
 
 Now that you have completed the implementation of this api-proxy on AWS, it should be functional.
 Send an HTTP request to the API Gateway's Invoke URL with the function path, which might be like:
