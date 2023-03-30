@@ -1,3 +1,8 @@
+# As I have found an easier way to achieve the redirect function without using Lambda functions, I have decided to stop developing this application.
+
+
+
+
 # api-proxy-lambda
 
 An API proxy designed for AWS serverless architecture, works with Lambda and API Gateway.
