@@ -62,3 +62,15 @@ $env:CGO_ENABLED = "0"`
 ```
 
 The compressed file should only contain the binary file and should be in zip format before uploading to Lambda.
+
+
+
+# Security and Cost Considerations
+
+## Security
+
+Please note that this tutorial does not incorporate any form of authorization on the API Gateway. This means that anyone who obtains your API Gateway's endpoint can access and use your API. We strongly recommend that you keep your endpoint secret until you have implemented adequate security measures to protect your API.
+
+## Cost
+
+Lambda and API Gateway are both paid features, with one or more of them having a limited free quota. The region where you deploy these services also affects the pricing. For more detailed information, please refer to AWS's pricing page.
